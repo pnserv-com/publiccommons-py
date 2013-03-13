@@ -24,8 +24,36 @@ class PublishResponse(ComplexModel):
 class MQService(ServiceBase):
     @srpc(AnyXml, _returns=PublishResponse)
     def publish(message):
-        print lxml.etree.tostring(message)
+        with open('recv.xml', 'w') as f:
+            f.write(lxml.etree.tostring(message))
+        result = parse(message)
+        print(result)
         return PublishResponse(response=ProcessResponse(code=0))
+
+
+def parse(elem):
+    d = Message()
+    for el in elem:
+        tag = el.tag.split('}')[-1]
+        d[tag] = parse(el) if len(el) > 0 else el.text
+
+    return d
+
+
+class Message(dict):
+    def __getattr__(self, key):
+        if key in self:
+            return self[key]
+        raise AttributeError(key)
+
+    def find(self, key):
+        if key in self:
+            return self[key]
+
+        for v in (x for x in self.values() if isinstance(x, Message)):
+            return v.find(key)
+
+        return None
 
 
 application = wsgi_soap_application([MQService], TARGET_NAMESPACE)
