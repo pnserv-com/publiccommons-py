@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import re
+import json
+import logging
 
 import lxml.etree
 from spyne.decorator import srpc
@@ -9,7 +11,11 @@ from spyne.model.primitive import Integer, AnyXml
 from spyne.model.complex import ComplexModel
 from spyne.util.simple import wsgi_soap_application
 
+from pcreceiver import nckvs
+
 TARGET_NAMESPACE = 'http://soap.publiccommons.ne.jp/'
+
+log = logging.getLogger(__name__)
 
 
 class ProcessResponse(ComplexModel):
@@ -26,11 +32,20 @@ class PublishResponse(ComplexModel):
 class MQService(ServiceBase):
     @srpc(AnyXml, _returns=PublishResponse)
     def publish(message):
-        with open('recv.xml', 'w') as f:
-            f.write(lxml.etree.tostring(message))
-        result = parse(message)
-        print(result)
-        print(result.find('edxlde:distributionID'))
+        root = parse(message)
+        content = root['commons:contentObject']
+        document = content.find('edxlde:embeddedXMLContent')
+        param = {
+            'status': root['edxlde:distributionStatus'],
+            'document_id': content['commons:documentID'],
+            'revision': content['commons:documentRevision'],
+            'category': content['commons:category'],
+            'area_code': root['commons:targetArea']['commons:jisX0402'],
+            'title': document.find('pcx_ib:Title'),
+            'summary': document.find('pcx_ib:Headline')['pcx_ib:Text'],
+            'raw': json.dumps(root, ensure_ascii=False)
+        }
+        upsert(param)
         return PublishResponse(response=ProcessResponse(code=0))
 
 
@@ -73,9 +88,39 @@ def parse(elem):
     return d
 
 
+def upsert(data):
+    data = dict(data)
+    matches = nckvs.search([{
+        'key': 'document_id', 'value': data['document_id'],
+        'pattern': 'cmp'
+    }])['datalist']
+
+    document_key = '{}.{}'.format(data['document_id'], data['revision'])
+    if not matches:
+        data['id'] = '-1'
+        log.info('new document: ' + document_key)
+    elif int(matches[0]['revision']) >= int(data['revision']):
+        log.info('same document exists: ' + document_key)
+        return
+    else:
+        data['id'] = matches[0]['id']
+        log.info('update document: ' + document_key)
+
+    return nckvs.set([data])
+
+
 application = wsgi_soap_application([MQService], TARGET_NAMESPACE)
 
 if __name__ == '__main__':
+    logging.basicConfig()
+    log.setLevel(logging.DEBUG)
+
+    from ConfigParser import SafeConfigParser
+    parser = SafeConfigParser()
+    parser.read('pcreceiver.ini')
+    config = dict(parser.items('nckvs'))
+    nckvs.setup(**config)
+
     from wsgiref.simple_server import make_server
     server = make_server('127.0.0.1', 7789, application)
     print('listening to http://127.0.0.1:7789')
