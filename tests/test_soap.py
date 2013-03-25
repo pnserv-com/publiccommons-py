@@ -54,3 +54,10 @@ class TestXMLDict(object):
         d = soap.XMLDict(nsmap)
         d['{http://example.com/ns1}foo'] = 1
         assert d['foo'] == 1
+
+    def test_nested_default_ns(self):
+        d1 = soap.XMLDict(TestXMLDict.nsmap)
+        d2 = soap.XMLDict({'http://example.com/ns1': None})
+        d2['{http://example.com/ns1}text'] = 'nested'
+        d1['{http://example.com/ns1}child'] = d2
+        assert d1['child']['text'] == 'nested'

@@ -60,15 +60,24 @@ class XMLDict(dict):
             self.rns[self.ns[None]] = None
 
     def __setitem__(self, key, value):
-        m = XMLDict.namespace_re.match(key)
-        if m:
-            alias = self.rns.get(m.group(1))
-            if alias:
-                key = '{}:{}'.format(alias, m.group(2))
-            else:
-                key = m.group(2)
-
+        if isinstance(value, XMLDict):
+            # keys must evalueted in child element's namespaces
+            # because a default namespace is also applied on a declared tag
+            key = value.resolve(key)
+        else:
+            key = self.resolve(key)
         super(XMLDict, self).__setitem__(key, value)
+
+    def resolve(self, name):
+        m = XMLDict.namespace_re.match(name)
+        if not m:
+            return name
+
+        alias = self.rns.get(m.group(1))
+        if alias:
+            return '{}:{}'.format(alias, m.group(2))
+        else:
+            return m.group(2)
 
     def find(self, key):
         if key in self:
