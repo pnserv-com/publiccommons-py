@@ -56,6 +56,8 @@ class XMLDict(dict):
         super(XMLDict, self).__init__()
         self.ns = ns or {}
         self.rns = {v: k for k, v in self.ns.items()}
+        if None in self.ns:
+            self.rns[self.ns[None]] = None
 
     def __setitem__(self, key, value):
         m = XMLDict.namespace_re.match(key)

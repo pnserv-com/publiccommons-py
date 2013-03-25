@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from collections import OrderedDict
+
 from pcreceiver import soap
 
 
@@ -37,3 +39,18 @@ class TestXMLDict(object):
         assert d.find('bar') == 2
         assert d.find('baz') == 3
         assert d.find('nothing') is None
+
+    def test_default_ns(self):
+        nsmap = OrderedDict({None: 'http://example.com/ns1'})
+        nsmap.update(TestXMLDict.nsmap)
+
+        d = soap.XMLDict(nsmap)
+        d['{http://example.com/ns1}foo'] = 1
+        assert d['foo'] == 1
+
+        del nsmap[None]
+        nsmap[None] = 'http://example.com/ns1'
+
+        d = soap.XMLDict(nsmap)
+        d['{http://example.com/ns1}foo'] = 1
+        assert d['foo'] == 1
