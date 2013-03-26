@@ -14,7 +14,7 @@ class RPCError(Exception):
         self.message = message
 
     def __str__(self):
-        return 'RPCError {} {}'.format(self.code, self.message)
+        return 'RPCError: {} {}'.format(self.code, self.message)
 
 
 def setup(base_url, login_name, login_pass, **kwargs):
@@ -62,8 +62,8 @@ def search(query):
 def _request(url, param):
     data = json.dumps(param)
     headers = {
-        'Content-Type': 'application/json',
-        'Content-Length': len(data)
+        'Content-type': 'application/json',
+        'Content-length': len(data)
     }
     req = urllib2.Request(url, data, headers)
     with closing(urllib2.urlopen(req)) as res:

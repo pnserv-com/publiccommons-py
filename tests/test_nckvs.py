@@ -92,5 +92,5 @@ def test_request_error(urlopen):
         except nckvs.RPCError as e:
             assert e.code == '400'
             assert e.message == 'invalid'
-            assert str(e) == 'RPCError 400 invalid'
+            assert str(e) == 'RPCError: 400 invalid'
             raise
