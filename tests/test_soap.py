@@ -5,6 +5,7 @@ import json
 from collections import OrderedDict
 
 import lxml.etree
+import pytest
 from mock import patch, call
 
 from pcreceiver import soap
@@ -130,3 +131,27 @@ class TestMQService(object):
             'summary': u'平成22年11月30日、A地区の土砂災害現場において避難勧告を行うこととしている基準雨量を超えたことによるもの（サンプル）'
         }
         assert json.loads(raw) == xmldict
+
+
+@pytest.mark.parametrize(('search_res', 'set_id'), [
+    ([], '-1'),
+    ([{'id': 'a001', 'revision': '0'}], 'a001'),
+    ([{'id': 'a001', 'revision': '1'}], None),
+    ([{'id': 'a001', 'revision': '2'}], None)
+])
+@patch('pcreceiver.nckvs.set')
+@patch('pcreceiver.nckvs.search')
+def test_upsert(search, set_, search_res, set_id):
+    data = {'document_id': 'a001', 'revision': '1'}
+    res = {'datalist': search_res}
+    search.return_value = res
+    soap.upsert(data)
+    assert search.call_args == call([{
+        'key': 'document_id',
+        'value': 'a001',
+        'pattern': 'cmp'
+    }])
+    if set_id is None:
+        assert set_.call_count == 0
+    else:
+        assert set_.call_args == call([dict(data, id=set_id)])
