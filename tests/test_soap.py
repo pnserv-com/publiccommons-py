@@ -8,6 +8,41 @@ import lxml.etree
 from pcreceiver import soap
 
 
+def load_xml(filename):
+    xml = os.path.join(os.path.dirname(__file__), 'data', filename)
+    return lxml.etree.parse(xml).getroot()
+
+
+def pytest_funcarg__xmldict(request):
+    return {
+        'edxlde:distributionID': '5eef9d6a-608f-4e7a-a9f7-2fa941d1abe2',
+        'edxlde:dateTimeSent': '2010-11-30T14:59:00+09:00',
+        'edxlde:distributionStatus': 'Actual',
+        'commons:targetArea': {
+            'commons:jisX0402': '282103'
+        },
+        'commons:contentObject': {
+            'edxlde:xmlContent': {
+                'edxlde:embeddedXMLContent': {
+                    'Report': {
+                        'pcx_ib:Head': {
+                            'pcx_ib:Title': u'加古川市: 避難勧告・指示情報　発令',
+                            'commons:documentID': '7e573043-fc3c-4a6b-bdb8-a9608233b0af',
+                            'pcx_ib:Headline': {
+                                'pcx_ib:Text': u'平成22年11月30日、A地区の土砂災害現場において避難勧告を行うこととしている基準雨量を超えたことによるもの（サンプル）'
+                            }
+                        }
+                    }
+                }
+            },
+            'commons:documentRevision': '1',
+            'commons:documentID': '7e573043-fc3c-4a6b-bdb8-a9608233b0af',
+            'commons:category': 'EvacuationOrder'
+        }
+    }
+
+
+
 class TestXMLDict(object):
     nsmap = {
         'ns1': 'http://example.com/ns1',
@@ -66,36 +101,6 @@ class TestXMLDict(object):
         assert d1['child']['text'] == 'nested'
 
 
-def test_parse():
-    def parse(filename):
-        xml = os.path.join(os.path.dirname(__file__), 'data', filename)
-        return soap.parse(lxml.etree.parse(xml).getroot())
-
-    result = {
-        'edxlde:distributionID': '5eef9d6a-608f-4e7a-a9f7-2fa941d1abe2',
-        'edxlde:dateTimeSent': '2010-11-30T14:59:00+09:00',
-        'edxlde:distributionStatus': 'Actual',
-        'commons:targetArea': {
-            'commons:jisX0402': '282103'
-        },
-        'commons:contentObject': {
-            'edxlde:xmlContent': {
-                'edxlde:embeddedXMLContent': {
-                    'Report': {
-                        'pcx_ib:Head': {
-                            'pcx_ib:Title': u'加古川市: 避難勧告・指示情報　発令',
-                            'commons:documentID': '7e573043-fc3c-4a6b-bdb8-a9608233b0af',
-                            'pcx_ib:Headline': {
-                                'pcx_ib:Text': u'平成22年11月30日、A地区の土砂災害現場において避難勧告を行うこととしている基準雨量を超えたことによるもの（サンプル）'
-                            }
-                        }
-                    }
-                }
-            },
-            'commons:documentRevision': '1',
-            'commons:documentID': '7e573043-fc3c-4a6b-bdb8-a9608233b0af',
-            'commons:category': 'EvacuationOrder'
-        }
-    }
-    assert parse('sample1.xml') == result
-    assert parse('sample2.xml') == result
+def test_parse(xmldict):
+    assert soap.parse(load_xml('sample1.xml')) == xmldict
+    assert soap.parse(load_xml('sample2.xml')) == xmldict
