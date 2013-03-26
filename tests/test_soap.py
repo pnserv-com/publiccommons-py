@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import os
+import json
 from collections import OrderedDict
 
 import lxml.etree
+from mock import patch, call
 
 from pcreceiver import soap
 
@@ -104,3 +106,27 @@ class TestXMLDict(object):
 def test_parse(xmldict):
     assert soap.parse(load_xml('sample1.xml')) == xmldict
     assert soap.parse(load_xml('sample2.xml')) == xmldict
+
+
+class TestMQService(object):
+    @patch('pcreceiver.soap.upsert')
+    def test_publish(self, upsert, xmldict):
+        message = load_xml('sample1.xml')
+        svc = soap.MQService()
+        res = svc.publish(message)
+        assert res.response.code == 0
+
+        # inspect upsert calls
+        args, _ = upsert.call_args
+        data = args[0]
+        raw = data.pop('raw')
+        assert data == {
+            'status': 'Actual',
+            'document_id': '7e573043-fc3c-4a6b-bdb8-a9608233b0af',
+            'revision': '1',
+            'category': 'EvacuationOrder',
+            'area_code': '282103',
+            'title': u'加古川市: 避難勧告・指示情報　発令',
+            'summary': u'平成22年11月30日、A地区の土砂災害現場において避難勧告を行うこととしている基準雨量を超えたことによるもの（サンプル）'
+        }
+        assert json.loads(raw) == xmldict
