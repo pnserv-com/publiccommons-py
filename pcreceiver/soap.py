@@ -93,7 +93,7 @@ class XMLDict(dict):
 
 def parse(elem):
     d = XMLDict(elem.nsmap)
-    for el in elem:
+    for el in (x for x in elem if not isinstance(x, lxml.etree._Comment)):
         d[el.tag] = parse(el) if len(el) > 0 else el.text
 
     return d

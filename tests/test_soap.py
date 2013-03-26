@@ -98,3 +98,4 @@ def test_parse():
         }
     }
     assert parse('sample1.xml') == result
+    assert parse('sample2.xml') == result
