@@ -32,21 +32,29 @@ class PublishResponse(ComplexModel):
 class MQService(ServiceBase):
     @srpc(AnyXml, _returns=PublishResponse)
     def publish(message):
-        root = parse(message)
-        content = root['commons:contentObject']
-        document = content.find('edxlde:embeddedXMLContent')
-        param = {
-            'status': root['edxlde:distributionStatus'],
-            'document_id': content['commons:documentID'],
-            'revision': content['commons:documentRevision'],
-            'category': content['commons:category'],
-            'area_code': root['commons:targetArea']['commons:jisX0402'],
-            'title': document.find('pcx_ib:Title'),
-            'summary': document.find('pcx_ib:Headline')['pcx_ib:Text'],
-            'raw': json.dumps(root, ensure_ascii=False)
-        }
-        upsert(param)
-        return PublishResponse(response=ProcessResponse(code=0))
+        try:
+            return _publish(message)
+        except Exception as e:
+            log.exception(e)
+            raise
+
+
+def _publish(message):
+    root = parse(message)
+    content = root['commons:contentObject']
+    document = content.find('edxlde:embeddedXMLContent')
+    param = {
+        'status': root['edxlde:distributionStatus'],
+        'document_id': content['commons:documentID'],
+        'revision': content['commons:documentRevision'],
+        'category': content['commons:category'],
+        'area_code': root['commons:targetArea']['commons:jisX0402'],
+        'title': document.find('pcx_ib:Title'),
+        'summary': document.find('pcx_ib:Headline')['pcx_ib:Text'],
+        'raw': json.dumps(root, ensure_ascii=False)
+    }
+    upsert(param)
+    return PublishResponse(response=ProcessResponse(code=0))
 
 
 class XMLDict(dict):
