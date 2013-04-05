@@ -43,14 +43,15 @@ def _publish(message):
     root = parse(message)
     content = root['commons:contentObject']
     document = content.find('edxlde:embeddedXMLContent')
+    ns = 'pcx_ib' if document.find('pcx_ib:Title') else 'pcx_cns_i3'
     param = {
         'status': root['edxlde:distributionStatus'],
         'document_id': content['commons:documentID'],
         'revision': content['commons:documentRevision'],
         'category': content['commons:category'],
         'area_code': root['commons:targetArea']['commons:jisX0402'],
-        'title': document.find('pcx_ib:Title'),
-        'summary': document.find('pcx_ib:Headline')['pcx_ib:Text'],
+        'title': document.find(ns + ':Title'),
+        'summary': document.find(ns + ':Headline')[ns + ':Text'],
         'raw': json.dumps(root, ensure_ascii=False)
     }
     upsert(param)
