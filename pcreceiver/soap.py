@@ -59,11 +59,36 @@ def _publish(message):
 
 
 class XMLDict(dict):
-    namespace_re = re.compile(r'{([^}]+)}(.+)')
-
     def __init__(self, ns=None):
         super(XMLDict, self).__init__()
         self.ns = ns or {}
+
+    def find(self, key):
+        if key in self:
+            return self[key]
+
+        for v in (x for x in self.values() if isinstance(x, XMLDict)):
+            r = v.find(key)
+            if r:
+                return r
+
+        return None
+
+    def shorten(self):
+        elem = ShortXMLDict(self.ns)
+        for key, value in self.iteritems():
+            if isinstance(value, XMLDict):
+                value = value.shorten()
+            elem[key] = value
+
+        return elem
+
+
+class ShortXMLDict(XMLDict):
+    namespace_re = re.compile(r'{([^}]+)}(.+)')
+
+    def __init__(self, ns=None):
+        super(ShortXMLDict, self).__init__(ns)
         self.rns = {v: k for k, v in self.ns.items()}
         if None in self.ns:
             self.rns[self.ns[None]] = None
@@ -78,7 +103,7 @@ class XMLDict(dict):
         super(XMLDict, self).__setitem__(key, value)
 
     def resolve(self, name):
-        m = XMLDict.namespace_re.match(name)
+        m = self.namespace_re.match(name)
         if not m:
             return name
 
@@ -88,20 +113,9 @@ class XMLDict(dict):
         else:
             return m.group(2)
 
-    def find(self, key):
-        if key in self:
-            return self[key]
-
-        for v in (x for x in self.values() if isinstance(x, XMLDict)):
-            r = v.find(key)
-            if r:
-                return r
-
-        return None
-
 
 def parse(elem):
-    d = XMLDict(elem.nsmap)
+    d = ShortXMLDict(elem.nsmap)
     for el in (x for x in elem if not isinstance(x, lxml.etree._Comment)):
         d[el.tag] = parse(el) if len(el) > 0 else el.text
 

@@ -82,19 +82,6 @@ class TestXMLDict(object):
     def test_init(self):
         d = soap.XMLDict(TestXMLDict.nsmap)
         assert d.ns == TestXMLDict.nsmap
-        assert d.rns == {
-        'http://example.com/ns1': 'ns1',
-        'http://example.com/ns2': 'ns2'
-    }
-
-    def test_setitem(self):
-        d = soap.XMLDict(TestXMLDict.nsmap)
-        d['{http://example.com/ns1}foo'] = 1
-        d['{http://example.com/ns2}foo'] = 2
-        d['{http://example.com/ns3}foo'] = 3
-        assert d['ns1:foo'] == 1
-        assert d['ns2:foo'] == 2
-        assert d['foo'] == 3
 
     def test_find(self):
         d = soap.XMLDict()
@@ -108,24 +95,63 @@ class TestXMLDict(object):
         assert d.find('baz') == 3
         assert d.find('nothing') is None
 
+    def test_shorten(self):
+        d1 = soap.XMLDict({'ns1': 'http://example.com/ns1'})
+        d2 = soap.XMLDict(self.nsmap)
+        d1['{http://example.com/ns1}text'] = 'top-level'
+        d2['{http://example.com/ns2}text'] = 'level 2'
+        d1['{http://example.com/ns2}child'] = d2
+        sd = d1.shorten()
+        assert isinstance(sd, soap.ShortXMLDict)
+        assert sd == {
+            'ns1:text': 'top-level',
+            'ns2:child': {
+                'ns2:text': 'level 2'
+            }
+        }
+
+
+class TestShortXMLDict(object):
+    nsmap = {
+        'ns1': 'http://example.com/ns1',
+        'ns2': 'http://example.com/ns2'
+    }
+
+    def test_init(self):
+        d = soap.ShortXMLDict(TestXMLDict.nsmap)
+        assert d.ns == TestXMLDict.nsmap
+        assert d.rns == {
+            'http://example.com/ns1': 'ns1',
+            'http://example.com/ns2': 'ns2'
+        }
+
+    def test_setitem(self):
+        d = soap.ShortXMLDict(TestXMLDict.nsmap)
+        d['{http://example.com/ns1}foo'] = 1
+        d['{http://example.com/ns2}foo'] = 2
+        d['{http://example.com/ns3}foo'] = 3
+        assert d['ns1:foo'] == 1
+        assert d['ns2:foo'] == 2
+        assert d['foo'] == 3
+
     def test_default_ns(self):
         nsmap = OrderedDict({None: 'http://example.com/ns1'})
         nsmap.update(TestXMLDict.nsmap)
 
-        d = soap.XMLDict(nsmap)
+        d = soap.ShortXMLDict(nsmap)
         d['{http://example.com/ns1}foo'] = 1
         assert d['foo'] == 1
 
         del nsmap[None]
         nsmap[None] = 'http://example.com/ns1'
 
-        d = soap.XMLDict(nsmap)
+        d = soap.ShortXMLDict(nsmap)
         d['{http://example.com/ns1}foo'] = 1
         assert d['foo'] == 1
 
     def test_nested_default_ns(self):
-        d1 = soap.XMLDict(TestXMLDict.nsmap)
-        d2 = soap.XMLDict({'http://example.com/ns1': None})
+        d1 = soap.ShortXMLDict(TestXMLDict.nsmap)
+        d2 = soap.ShortXMLDict({'http://example.com/ns1': None})
         d2['{http://example.com/ns1}text'] = 'nested'
         d1['{http://example.com/ns1}child'] = d2
         assert d1['child']['text'] == 'nested'
