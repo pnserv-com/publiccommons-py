@@ -18,6 +18,63 @@ def load_xml(filename):
 
 def pytest_funcarg__xmldict(request):
     d1 = {
+        '{urn:oasis:names:tc:emergency:EDXL:DE:1.0}distributionID': '5eef9d6a-608f-4e7a-a9f7-2fa941d1abe2',
+        '{urn:oasis:names:tc:emergency:EDXL:DE:1.0}dateTimeSent': '2010-11-30T14:59:00+09:00',
+        '{urn:oasis:names:tc:emergency:EDXL:DE:1.0}distributionStatus': 'Actual',
+        '{http://xml.publiccommons.ne.jp/xml/edxl/}targetArea': {
+            '{http://xml.publiccommons.ne.jp/xml/edxl/}jisX0402': '282103'
+        },
+        '{http://xml.publiccommons.ne.jp/xml/edxl/}contentObject': {
+            '{urn:oasis:names:tc:emergency:EDXL:DE:1.0}xmlContent': {
+                '{urn:oasis:names:tc:emergency:EDXL:DE:1.0}embeddedXMLContent': {
+                    '{http://xml.publiccommons.ne.jp/pcxml1/3}Report': {
+                        '{http://xml.publiccommons.ne.jp/pcxml1/informationBasis3/}Head': {
+                            '{http://xml.publiccommons.ne.jp/pcxml1/informationBasis3/}Title': u'加古川市: 避難勧告・指示情報　発令',
+                            '{http://xml.publiccommons.ne.jp/xml/edxl/}documentID': '7e573043-fc3c-4a6b-bdb8-a9608233b0af',
+                            '{http://xml.publiccommons.ne.jp/pcxml1/informationBasis3/}Headline': {
+                                '{http://xml.publiccommons.ne.jp/pcxml1/informationBasis3/}Text': u'平成22年11月30日、A地区の土砂災害現場において避難勧告を行うこととしている基準雨量を超えたことによるもの（サンプル）'
+                            }
+                        }
+                    }
+                }
+            },
+            '{http://xml.publiccommons.ne.jp/xml/edxl/}documentRevision': '1',
+            '{http://xml.publiccommons.ne.jp/xml/edxl/}documentID': '7e573043-fc3c-4a6b-bdb8-a9608233b0af',
+            '{http://xml.publiccommons.ne.jp/xml/edxl/}category': 'EvacuationOrder'
+        }
+    }
+    d2 = {
+        '{urn:oasis:names:tc:emergency:EDXL:DE:1.0}distributionID': '5eef9d6a-608f-4e7a-a9f7-2fa941d1abe2',
+        '{urn:oasis:names:tc:emergency:EDXL:DE:1.0}dateTimeSent': '2010-11-30T14:59:00+09:00',
+        '{urn:oasis:names:tc:emergency:EDXL:DE:1.0}distributionStatus': 'Actual',
+        '{http://xml.publiccommons.ne.jp/xml/edxl/}targetArea': {
+            '{http://xml.publiccommons.ne.jp/xml/edxl/}jisX0402': '282103'
+        },
+        '{http://xml.publiccommons.ne.jp/xml/edxl/}contentObject': {
+            '{urn:oasis:names:tc:emergency:EDXL:DE:1.0}xmlContent': {
+                '{urn:oasis:names:tc:emergency:EDXL:DE:1.0}embeddedXMLContent': {
+                    '{http://xml.publiccommons.ne.jp/pcxml1/3}Report': {
+                        '{http://xml.publiccommons.ne.jp/pcxml1/informationBasis4/}Head': {
+                            '{http://xml.publiccommons.ne.jp/pcxml1/informationBasis4/}Title': u'加古川市: 避難勧告・指示情報　発令',
+                            '{http://xml.publiccommons.ne.jp/xml/edxl/}documentID': '7e573043-fc3c-4a6b-bdb8-a9608233b0af',
+                            '{http://xml.publiccommons.ne.jp/pcxml1/informationBasis4/}Headline': {
+                                '{http://xml.publiccommons.ne.jp/pcxml1/informationBasis4/}Text': u'平成22年11月30日、A地区の土砂災害現場において避難勧告を行うこととしている基準雨量を超えたことによるもの（サンプル）'
+                            }
+                        }
+                    }
+                }
+            },
+            '{http://xml.publiccommons.ne.jp/xml/edxl/}documentRevision': '1',
+            '{http://xml.publiccommons.ne.jp/xml/edxl/}documentID': '7e573043-fc3c-4a6b-bdb8-a9608233b0af',
+            '{http://xml.publiccommons.ne.jp/xml/edxl/}category': 'EvacuationOrder'
+        }
+    }
+
+    return [d1, d1, d2]
+
+
+def pytest_funcarg__shortxmldict(request):
+    d1 = {
         'edxlde:distributionID': '5eef9d6a-608f-4e7a-a9f7-2fa941d1abe2',
         'edxlde:dateTimeSent': '2010-11-30T14:59:00+09:00',
         'edxlde:distributionStatus': 'Actual',
@@ -160,6 +217,7 @@ class TestShortXMLDict(object):
 def test_parse(xmldict):
     assert soap.parse(load_xml('sample1.xml')) == xmldict[0]
     assert soap.parse(load_xml('sample2.xml')) == xmldict[1]
+    assert soap.parse(load_xml('sample3.xml')) == xmldict[2]
 
 
 class TestMQService(object):
@@ -167,7 +225,7 @@ class TestMQService(object):
         ('sample1.xml', 0), ('sample3.xml', 2)
     ])
     @patch('pcreceiver.soap.upsert')
-    def test_publish(self, upsert, xmldict, xml, index):
+    def test_publish(self, upsert, shortxmldict, xml, index):
         message = load_xml(xml)
         svc = soap.MQService()
         res = svc.publish(message)
@@ -186,7 +244,7 @@ class TestMQService(object):
             'title': u'加古川市: 避難勧告・指示情報　発令',
             'summary': u'平成22年11月30日、A地区の土砂災害現場において避難勧告を行うこととしている基準雨量を超えたことによるもの（サンプル）'
         }
-        assert json.loads(raw) == xmldict[index]
+        assert json.loads(raw) == shortxmldict[index]
 
 
 @pytest.mark.parametrize(('search_res', 'set_id'), [

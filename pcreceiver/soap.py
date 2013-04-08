@@ -14,6 +14,12 @@ from spyne.util.simple import wsgi_soap_application
 from pcreceiver import nckvs
 
 TARGET_NAMESPACE = 'http://soap.publiccommons.ne.jp/'
+NS_MAP = {
+    'edxlde': 'urn:oasis:names:tc:emergency:EDXL:DE:1.0',
+    'commons': 'http://xml.publiccommons.ne.jp/xml/edxl/',
+    'pcx_ib': 'http://xml.publiccommons.ne.jp/pcxml1/informationBasis3/',
+    'pcx_cns_i3': 'http://xml.publiccommons.ne.jp/pcxml1/informationBasis4/'
+}
 
 log = logging.getLogger(__name__)
 
@@ -40,20 +46,28 @@ class MQService(ServiceBase):
 
 
 def _publish(message):
+    def exp(ns, name):
+        return '{{{0}}}{1}'.format(NS_MAP[ns], name)
+
     root = parse(message)
-    content = root['commons:contentObject']
-    document = content.find('edxlde:embeddedXMLContent')
-    ns = 'pcx_ib' if document.find('pcx_ib:Title') else 'pcx_cns_i3'
+    content = root[exp('commons', 'contentObject')]
+    document = content.find(exp('edxlde', 'embeddedXMLContent'))
+    if document.find(exp('pcx_ib', 'Title')):
+        ns_ib = 'pcx_ib'
+    else:
+        ns_ib = 'pcx_cns_i3'
+
     param = {
-        'status': root['edxlde:distributionStatus'],
-        'document_id': content['commons:documentID'],
-        'revision': content['commons:documentRevision'],
-        'category': content['commons:category'],
-        'area_code': root['commons:targetArea']['commons:jisX0402'],
-        'title': document.find(ns + ':Title'),
-        'summary': document.find(ns + ':Headline')[ns + ':Text'],
-        'raw': json.dumps(root, ensure_ascii=False)
+        'status': root[exp('edxlde', 'distributionStatus')],
+        'document_id': content[exp('commons', 'documentID')],
+        'revision': content[exp('commons', 'documentRevision')],
+        'category': content[exp('commons', 'category')],
+        'area_code': root[exp('commons', 'targetArea')][exp('commons', 'jisX0402')],
+        'title': document.find(exp(ns_ib, 'Title')),
+        'summary': document.find(exp(ns_ib, 'Headline'))[exp(ns_ib, 'Text')],
+        'raw': json.dumps(root.shorten(), ensure_ascii=False)
     }
+
     upsert(param)
     return PublishResponse(response=ProcessResponse(code=0))
 
@@ -115,7 +129,7 @@ class ShortXMLDict(XMLDict):
 
 
 def parse(elem):
-    d = ShortXMLDict(elem.nsmap)
+    d = XMLDict(elem.nsmap)
     for el in (x for x in elem if not isinstance(x, lxml.etree._Comment)):
         d[el.tag] = parse(el) if len(el) > 0 else el.text
 

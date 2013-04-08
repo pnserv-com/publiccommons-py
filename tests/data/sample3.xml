@@ -14,7 +14,8 @@
 	<commons:contentObject>
 		<edxlde:xmlContent>
 			<edxlde:embeddedXMLContent>
-				<Report xmlns:pcx_cns_i20="http://xml.publiccommons.ne.jp/xml/edxl/"
+				<Report xmlns="http://xml.publiccommons.ne.jp/pcxml1/3"
+					xmlns:pcx_cns_i20="http://xml.publiccommons.ne.jp/xml/edxl/"
 					xmlns:pcx_cns_i3="http://xml.publiccommons.ne.jp/pcxml1/informationBasis4/">
 					<pcx_cns_i3:Head>
 						<pcx_cns_i3:Title>加古川市: 避難勧告・指示情報　発令</pcx_cns_i3:Title>
