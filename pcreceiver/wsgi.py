@@ -31,10 +31,12 @@ class RequestLogger(object):
         self.log = logging.getLogger(logger_name)
 
     def __call__(self, environ, start_response):
-        length = int(environ.get('CONTENT_LENGTH', '0'))
-        body = StringIO(environ['wsgi.input'].read(length))
-        self.log.info(body.getvalue())
-        environ['wsgi.input'] = body
+        if environ['REQUEST_METHOD'] == 'POST':
+            length = int(environ.get('CONTENT_LENGTH', '0'))
+            body = StringIO(environ['wsgi.input'].read(length))
+            self.log.info(body.getvalue())
+            environ['wsgi.input'] = body
+
         return self.application(environ, start_response)
 
 
