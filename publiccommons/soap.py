@@ -13,7 +13,7 @@ from spyne.application import Application
 from spyne.protocol.soap import Soap11
 from spyne.server.wsgi import WsgiApplication
 
-from pcreceiver import nckvs
+from publiccommons import nckvs
 
 TARGET_NAMESPACE = 'http://soap.publiccommons.ne.jp/'
 NS_MAP = {

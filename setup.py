@@ -24,7 +24,7 @@ tests_require = requires + [
     'tox'
 ]
 
-setup(name='pcreceiver',
+setup(name='publiccommons',
       version=version,
       description='A RPC Receiver for PublicCommons',
       long_description=README + '\n\n' + CHANGES,

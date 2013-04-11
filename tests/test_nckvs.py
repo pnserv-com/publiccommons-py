@@ -5,7 +5,7 @@ from StringIO import StringIO
 import pytest
 from mock import patch, call
 
-from pcreceiver import nckvs
+from publiccommons import nckvs
 
 BASE_URL = 'http://example.com'
 
@@ -42,7 +42,7 @@ def test_setup(system_param):
     assert nckvs._system_param == system_param
 
 
-@patch('pcreceiver.nckvs._request')
+@patch('publiccommons.nckvs._request')
 def test_set(_request, system_param):
     nckvs.set([{'key1': 'value1'}])
     assert _request.call_args == call(BASE_URL + '/data/set/', {
@@ -55,7 +55,7 @@ def test_set(_request, system_param):
     })
 
 
-@patch('pcreceiver.nckvs._request')
+@patch('publiccommons.nckvs._request')
 def test_search(_request, system_param):
     nckvs.search([{'key': 'key1', 'value': 'valu1', 'pattern': 'cmp'}])
     assert _request.call_args == call(BASE_URL + '/data/search/', {

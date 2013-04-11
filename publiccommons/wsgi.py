@@ -4,7 +4,7 @@ import os
 import logging.config
 from ConfigParser import SafeConfigParser
 
-from pcreceiver import nckvs
+from publiccommons import nckvs
 
 try:
     from cStringIO import StringIO
@@ -13,12 +13,12 @@ except ImportError:
 
 
 def search_config():
-    path = os.getenv('PCRECEIVER_CONFIG')
+    path = os.getenv('PUBLICCOMMONS_CONFIG')
     if path and os.path.exists(path):
         return path
 
     for dir_ in (os.getcwd(), os.path.expanduser('~'), '/etc'):
-        path = os.path.join(dir_, 'pcreceiver.ini')
+        path = os.path.join(dir_, 'publiccommons.ini')
         if os.path.exists(path):
             return path
 
@@ -48,7 +48,7 @@ parser.read(config)
 config = dict(parser.items('nckvs'))
 nckvs.setup(**config)
 
-from pcreceiver.soap import application
+from publiccommons.soap import application
 application = RequestLogger(application)
 
 if __name__ == '__main__':

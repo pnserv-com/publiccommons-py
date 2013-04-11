@@ -8,7 +8,7 @@ import lxml.etree
 import pytest
 from mock import patch, call
 
-from pcreceiver import soap
+from publiccommons import soap
 
 
 def load_xml(filename):
@@ -224,7 +224,7 @@ class TestMQService(object):
     @pytest.mark.parametrize(('xml', 'index'), [
         ('sample1.xml', 0), ('sample3.xml', 2)
     ])
-    @patch('pcreceiver.soap.upsert')
+    @patch('publiccommons.soap.upsert')
     def test_publish(self, upsert, shortxmldict, xml, index):
         message = load_xml(xml)
         svc = soap.MQService()
@@ -253,8 +253,8 @@ class TestMQService(object):
     ([{'id': 'a001', 'revision': '1'}], None),
     ([{'id': 'a001', 'revision': '2'}], None)
 ])
-@patch('pcreceiver.nckvs.set')
-@patch('pcreceiver.nckvs.search')
+@patch('publiccommons.nckvs.set')
+@patch('publiccommons.nckvs.search')
 def test_upsert(search, set_, search_res, set_id):
     data = {'document_id': 'a001', 'revision': '1'}
     res = {'datalist': search_res}
