@@ -20,6 +20,7 @@ tests_require = requires + [
     'pytest-pep8',
     'pytest-cov',
     'mock',
+    'webtest',
     'tox'
 ]
 

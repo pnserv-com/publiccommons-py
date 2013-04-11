@@ -9,7 +9,9 @@ from spyne.decorator import srpc
 from spyne.service import ServiceBase
 from spyne.model.primitive import Integer, AnyXml
 from spyne.model.complex import ComplexModel
-from spyne.util.simple import wsgi_soap_application
+from spyne.application import Application
+from spyne.protocol.soap import Soap11
+from spyne.server.wsgi import WsgiApplication
 
 from pcreceiver import nckvs
 
@@ -157,4 +159,11 @@ def upsert(data):
     return nckvs.set([data])
 
 
-application = wsgi_soap_application([MQService], TARGET_NAMESPACE)
+application = Application([MQService], TARGET_NAMESPACE,
+                          in_protocol=Soap11(validator='lxml'),
+                          out_protocol=Soap11())
+
+# set block_length same as max_content_length
+# because splitting inappropriate position causes UnicodeDecodeError
+application = WsgiApplication(application, max_content_length=2 * 1024 * 1024,
+                              block_length=2 * 1024 * 1024)
