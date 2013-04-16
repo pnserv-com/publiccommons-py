@@ -13,8 +13,6 @@ from spyne.application import Application
 from spyne.protocol.soap import Soap11
 from spyne.server.wsgi import WsgiApplication
 
-from publiccommons import nckvs
-
 TARGET_NAMESPACE = 'http://soap.publiccommons.ne.jp/'
 NS_MAP = {
     'edxlde': 'urn:oasis:names:tc:emergency:EDXL:DE:1.0',
@@ -24,6 +22,7 @@ NS_MAP = {
 }
 
 log = logging.getLogger(__name__)
+nckvs = None
 
 
 class ProcessResponse(ComplexModel):
@@ -159,11 +158,16 @@ def upsert(data):
     return nckvs.set([data])
 
 
-application = Application([MQService], TARGET_NAMESPACE,
-                          in_protocol=Soap11(validator='lxml'),
-                          out_protocol=Soap11())
+def get_app(kvsclient):
+    import sys
+    setattr(sys.modules[__name__], 'nckvs', kvsclient)
 
-# set block_length same as max_content_length
-# because splitting inappropriate position causes UnicodeDecodeError
-application = WsgiApplication(application, max_content_length=2 * 1024 * 1024,
-                              block_length=2 * 1024 * 1024)
+    application = Application([MQService], TARGET_NAMESPACE,
+                              in_protocol=Soap11(validator='lxml'),
+                              out_protocol=Soap11())
+
+    # set block_length same as max_content_length
+    # because splitting inappropriate position causes UnicodeDecodeError
+    return WsgiApplication(application,
+                           max_content_length=2 * 1024 * 1024,
+                           block_length=2 * 1024 * 1024)

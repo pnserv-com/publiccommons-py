@@ -11,8 +11,8 @@ from publiccommons.wsgi import application
 data_dir = os.path.join(os.path.dirname(__file__), 'data')
 
 
-@patch('publiccommons.nckvs.set')
-@patch('publiccommons.nckvs.search', return_value={'datalist': []})
+@patch('nckvsclient.KVSClient.set')
+@patch('nckvsclient.KVSClient.search', return_value={'datalist': []})
 def test_multibyte_data(search, set_):
     with open(os.path.join(data_dir, 'soap1.xml')) as f:
         xml = f.read()

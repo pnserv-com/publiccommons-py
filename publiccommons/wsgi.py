@@ -4,7 +4,7 @@ import os
 import logging.config
 from ConfigParser import SafeConfigParser
 
-from publiccommons import nckvs
+from nckvsclient import KVSClient
 
 try:
     from cStringIO import StringIO
@@ -46,10 +46,11 @@ logging.config.fileConfig(config)
 parser = SafeConfigParser()
 parser.read(config)
 config = dict(parser.items('nckvs'))
-nckvs.setup(**config)
+config['datatypeversion'] = int(config.get('datatypeversion', '1'))
+client = KVSClient(**config)
 
-from publiccommons.soap import application
-application = RequestLogger(application)
+from publiccommons.soap import get_app
+application = RequestLogger(get_app(client))
 
 if __name__ == '__main__':
     from wsgiref.simple_server import make_server

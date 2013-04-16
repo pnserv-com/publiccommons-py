@@ -253,19 +253,18 @@ class TestMQService(object):
     ([{'id': 'a001', 'revision': '1'}], None),
     ([{'id': 'a001', 'revision': '2'}], None)
 ])
-@patch('publiccommons.nckvs.set')
-@patch('publiccommons.nckvs.search')
-def test_upsert(search, set_, search_res, set_id):
+@patch.object(soap, 'nckvs')
+def test_upsert(nckvs, search_res, set_id):
     data = {'document_id': 'a001', 'revision': '1'}
     res = {'datalist': search_res}
-    search.return_value = res
+    nckvs.search.return_value = res
     soap.upsert(data)
-    assert search.call_args == call([{
+    assert nckvs.search.call_args == call([{
         'key': 'document_id',
         'value': 'a001',
         'pattern': 'cmp'
     }])
     if set_id is None:
-        assert set_.call_count == 0
+        assert nckvs.set.call_count == 0
     else:
-        assert set_.call_args == call([dict(data, id=set_id)])
+        assert nckvs.set.call_args == call([dict(data, id=set_id)])
