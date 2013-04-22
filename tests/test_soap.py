@@ -253,7 +253,7 @@ class TestMQService(object):
             'area_code': '282103',
             'title': u'加古川市: 避難勧告・指示情報　発令',
             'summary': u'平成22年11月30日、A地区の土砂災害現場において避難勧告を行うこととしている基準雨量を超えたことによるもの（サンプル）',
-            'raw': shortxmldict[index]
+            'rawdata': shortxmldict[index]
         }
 
 
