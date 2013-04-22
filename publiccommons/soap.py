@@ -66,7 +66,7 @@ def _publish(message):
         'area_code': root[exp('commons', 'targetArea')][exp('commons', 'jisX0402')],
         'title': document.find(exp(ns_ib, 'Title')),
         'summary': document.find(exp(ns_ib, 'Headline'))[exp(ns_ib, 'Text')],
-        'raw': json.dumps(root.shorten(), ensure_ascii=False)
+        'raw': root.shorten()
     }
 
     upsert(param)

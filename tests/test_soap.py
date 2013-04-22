@@ -245,7 +245,6 @@ class TestMQService(object):
         # inspect upsert calls
         args, _ = upsert.call_args
         data = args[0]
-        raw = data.pop('raw')
         assert data == {
             'status': 'Actual',
             'document_id': '7e573043-fc3c-4a6b-bdb8-a9608233b0af',
@@ -253,9 +252,9 @@ class TestMQService(object):
             'category': 'EvacuationOrder',
             'area_code': '282103',
             'title': u'加古川市: 避難勧告・指示情報　発令',
-            'summary': u'平成22年11月30日、A地区の土砂災害現場において避難勧告を行うこととしている基準雨量を超えたことによるもの（サンプル）'
+            'summary': u'平成22年11月30日、A地区の土砂災害現場において避難勧告を行うこととしている基準雨量を超えたことによるもの（サンプル）',
+            'raw': shortxmldict[index]
         }
-        assert json.loads(raw) == shortxmldict[index]
 
 
 @pytest.mark.parametrize(('search_res', 'set_id'), [
