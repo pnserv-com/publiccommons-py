@@ -153,25 +153,13 @@ def parse(elem):
     return d
 
 
+def is_new_revision(old, new_):
+    return int(old['revision']) < int(new_['revision'])
+
+
 def upsert(data):
-    data = dict(data)
-    matches = nckvs.search([{
-        'key': 'document_id', 'value': data['document_id'],
-        'pattern': 'cmp'
-    }])['datalist']
-
-    document_key = '{}.{}'.format(data['document_id'], data['revision'])
-    if not matches:
-        data['id'] = '-1'
-        log.info('new document: ' + document_key)
-    elif int(matches[0]['revision']) >= int(data['revision']):
-        log.info('same document exists: ' + document_key)
-        return
-    else:
-        data['id'] = matches[0]['id']
-        log.info('update document: ' + document_key)
-
-    return nckvs.set([data])
+    log.info('process: {document_id}.{revision}'.format(**data))
+    return nckvs.upsert(data, 'document_id', cmp=is_new_revision)
 
 
 def get_app(kvsclient):
