@@ -98,6 +98,22 @@ class XMLDict(dict):
 
         return elem
 
+    def encode(self, encoding):
+        elem = self.__class__(self.ns)
+        for key, value in self.items():
+            key = self._encode(key, encoding)
+            if isinstance(value, XMLDict):
+                elem[key] = value.encode(encoding)
+            else:
+                elem[key] = self._encode(value, encoding)
+
+        return elem
+
+    def _encode(self, s, encoding):
+        if isinstance(s, unicode):
+            return s.encode(encoding)
+        return s
+
 
 class ShortXMLDict(XMLDict):
     namespace_re = re.compile(r'{([^}]+)}(.+)')

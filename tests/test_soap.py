@@ -167,6 +167,17 @@ class TestXMLDict(object):
             }
         }
 
+    def test_encode(self):
+        d1 = soap.XMLDict()
+        d2 = soap.XMLDict()
+        d1[u'日本語'] = u'データ'
+        d2[u'ネスト'] = u'バリュー'
+        d1['child'] = d2
+        assert d1.encode('utf-8') == {
+            '日本語': 'データ',
+            'child': {'ネスト': 'バリュー'}
+        }
+
 
 class TestShortXMLDict(object):
     nsmap = {
