@@ -256,6 +256,16 @@ class TestMQService(object):
             'rawdata': shortxmldict[index]
         }
 
+    @patch('publiccommons.soap.upsert')
+    def test_publish_incomplete_data(self, upsert):
+        message = load_xml('sample4.xml')
+        svc = soap.MQService()
+        res = svc.publish(message)
+        assert res.response.code == 0
+
+        args, _ = upsert.call_args
+        assert args[0]['area_code'] == ''
+
 
 @pytest.mark.parametrize(('search_res', 'set_id'), [
     ([], '-1'),

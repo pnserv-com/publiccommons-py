@@ -63,7 +63,7 @@ def _publish(message):
         'document_id': content[exp('commons', 'documentID')],
         'revision': content[exp('commons', 'documentRevision')],
         'category': content[exp('commons', 'category')],
-        'area_code': root[exp('commons', 'targetArea')][exp('commons', 'jisX0402')],
+        'area_code': root[exp('commons', 'targetArea')].get(exp('commons', 'jisX0402'), ''),
         'title': document.find(exp(ns_ib, 'Title')),
         'summary': document.find(exp(ns_ib, 'Headline'))[exp(ns_ib, 'Text')],
         'rawdata': root.shorten()

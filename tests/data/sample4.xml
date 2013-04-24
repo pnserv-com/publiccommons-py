@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<edxlde:EDXLDistribution xmlns:pcx_ev="http://xml.publiccommons.ne.jp/pcxml1/body/evacuation3"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:edxlde="urn:oasis:names:tc:emergency:EDXL:DE:1.0"
+	xmlns:commons="http://xml.publiccommons.ne.jp/xml/edxl/"
+	xmlns:pcxml="http://xml.publiccommons.ne.jp/pcxml1/3"
+	xmlns:pcx_eb="http://xml.publiccommons.ne.jp/pcxml1/elementBasis3/">
+	<edxlde:distributionID>5eef9d6a-608f-4e7a-a9f7-2fa941d1abe2</edxlde:distributionID>
+	<edxlde:dateTimeSent>2010-11-30T14:59:00+09:00</edxlde:dateTimeSent>
+	<edxlde:distributionStatus>Actual</edxlde:distributionStatus>
+	<commons:targetArea>
+		<commons:areaName>Test Area</commons:areaName>
+	</commons:targetArea>
+	<commons:contentObject>
+		<edxlde:xmlContent>
+			<edxlde:embeddedXMLContent>
+				<Report xmlns="http://xml.publiccommons.ne.jp/pcxml1/3"
+					xmlns:pcx_cns_i20="http://xml.publiccommons.ne.jp/xml/edxl/"
+					xmlns:pcx_cns_i3="http://xml.publiccommons.ne.jp/pcxml1/informationBasis4/">
+					<pcx_cns_i3:Head>
+						<pcx_cns_i3:Title>加古川市: 避難勧告・指示情報　発令</pcx_cns_i3:Title>
+						<pcx_cns_i20:documentID>7e573043-fc3c-4a6b-bdb8-a9608233b0af</pcx_cns_i20:documentID>
+						<pcx_cns_i3:Headline>
+							<pcx_cns_i3:Text>平成22年11月30日、A地区の土砂災害現場において避難勧告を行うこととしている基準雨量を超えたことによるもの（サンプル）</pcx_cns_i3:Text>
+						</pcx_cns_i3:Headline>
+					</pcx_cns_i3:Head>
+				</Report>
+			</edxlde:embeddedXMLContent>
+		</edxlde:xmlContent>
+		<commons:documentRevision>1</commons:documentRevision>
+		<commons:documentID>7e573043-fc3c-4a6b-bdb8-a9608233b0af</commons:documentID>
+		<commons:category>EvacuationOrder</commons:category>
+	</commons:contentObject>
+</edxlde:EDXLDistribution>
