@@ -262,9 +262,14 @@ class TestMQService(object):
         svc = soap.MQService()
         res = svc.publish(message)
         assert res.response.code == 0
-
         args, _ = upsert.call_args
         assert args[0]['area_code'] == ''
+
+        message = load_xml('sample5.xml')
+        res = svc.publish(message)
+        assert res.response.code == 0
+        args, _ = upsert.call_args
+        assert args[0]['summary'] == ''
 
 
 @pytest.mark.parametrize(('search_res', 'set_id'), [
